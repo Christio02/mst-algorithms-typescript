@@ -1,18 +1,6 @@
 import type { VertexId } from "../interface.js";
 
-/*
-Implementation Tips
 
-Path compression: After find, set parent[x] = root.
-
-Union by rank:
-Attach shallower tree under deeper tree; if equal rank, pick one and increment its rank.
-
-Common Pitfall
-
-Forgetting to return whether a union actually merged distinct sets
-Kruskal needs this to know whether to accept an edge.
-*/
 export class DisjointSet {
   private parent: Map<VertexId, VertexId>;
   private rank: Map<VertexId, number>;
