@@ -171,4 +171,99 @@ function runBenchmarks() {
     console.log("\n=== Benchmark Complete ===");
 }
 
-runBenchmarks();
+function solve_assingment() {
+    const vertices = Array.from({ length: 15 }, (_, i) => i);
+    const edges: Edge[] = [
+        // outer ring
+        { u: 0, v: 1, weight: 6 }, // 1–2
+        { u: 1, v: 2, weight: 3 }, // 2–3
+        { u: 2, v: 3, weight: 9 }, // 3–4
+        { u: 3, v: 4, weight: 2 }, // 4–5
+        { u: 4, v: 5, weight: 8 }, // 5–6
+        { u: 5, v: 6, weight: 5 }, // 6–7
+        { u: 6, v: 7, weight: 7 }, // 7–8
+        { u: 7, v: 8, weight: 1 }, // 8–9
+        { u: 8, v: 9, weight: 4 }, // 9–10
+        { u: 9, v: 10, weight: 10 }, // 10–11
+        { u: 10, v: 11, weight: 2 }, // 11–12
+        { u: 11, v: 12, weight: 6 }, // 12–13
+        { u: 12, v: 13, weight: 8 }, // 13–14
+        { u: 13, v: 14, weight: 3 }, // 14–15
+        { u: 14, v: 0, weight: 5 }, // 15–1
+
+        // extra inner edges from vertex 1 (index 0)
+        { u: 0, v: 2, weight: 4 }, // 1–3
+        { u: 0, v: 5, weight: 9 }, // 1–6
+        { u: 0, v: 6, weight: 2 }, // 1–7
+        { u: 0, v: 7, weight: 10 }, // 1–8
+        { u: 0, v: 9, weight: 3 }, // 1–10
+
+        // extra inner edges from vertex 15 (index 14)
+        { u: 14, v: 9, weight: 1 }, // 15–10
+        { u: 14, v: 10, weight: 7 }, // 15–11
+
+        // inner edge between others
+        { u: 2, v: 5, weight: 6 }, // 3–6
+    ];
+
+    const graph: Graph = {
+        vertices,
+        edges,
+        adjList: buildAdjList(vertices, edges),
+    };
+
+    console.log("\n=== Assignment Graph ===");
+    console.log(`Vertices: ${graph.vertices.length}`);
+    console.log(`Edges: ${graph.edges.length}`);
+
+    // measure kruskal
+    let kruskalResult: Edge[] = [];
+    const kruskalTime = measureTime(() => {
+        kruskalResult = kruskalMST(graph);
+    });
+
+    // measure prim
+    let primResult: Edge[] = [];
+    const primTime = measureTime(() => {
+        primResult = primMST(graph);
+    });
+
+    const kruskalValid = verifyMST(graph, kruskalResult);
+    const primValid = verifyMST(graph, primResult);
+
+    const kruskalWeight = kruskalResult.reduce((sum, e) => sum + e.weight, 0);
+    const primWeight = primResult.reduce((sum, e) => sum + e.weight, 0);
+
+    console.log(
+        `  Kruskal: ${kruskalTime.toFixed(3)}ms (weight: ${kruskalWeight}) ${kruskalValid ? "Yes" : "No"}`,
+    );
+    console.log(
+        `  Prim:    ${primTime.toFixed(3)}ms (weight: ${primWeight}) ${primValid ? "Yes" : "No"}`,
+    );
+
+    const faster = kruskalTime < primTime ? "Kruskal" : "Prim";
+    const maxTime = Math.max(kruskalTime, primTime, Number.EPSILON);
+    const speedup = (Math.abs(kruskalTime - primTime) / maxTime) * 100;
+
+    if (maxTime < 0.001) {
+        console.log(
+            `  Winner: ${faster} (both too fast to measure accurately)`,
+        );
+    } else {
+        console.log(`  Winner: ${faster} (${speedup.toFixed(1)}% faster)`);
+    }
+
+    if (Math.abs(kruskalWeight - primWeight) > 0.01) {
+        console.warn(
+            `  ⚠️  Weight mismatch! Kruskal: ${kruskalWeight}, Prim: ${primWeight}`,
+        );
+    }
+
+    console.log(`\nKruskal MST edges:`);
+    kruskalResult.forEach((e) => {
+        console.log(`  ${e.u + 1} -- ${e.v + 1} [weight: ${e.weight}]`);
+    });
+}
+
+solve_assingment();
+//runBenchmarks();
